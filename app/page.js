@@ -91,7 +91,7 @@ export default async function Home() {
     <main>
       <div className="header">
         <div>
-          <h1>Family Finance</h1>
+          <h1>PennyPilot</h1>
           <p className="small">Phone-first budget tracker</p>
         </div>
       </div>
