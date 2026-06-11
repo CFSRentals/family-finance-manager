@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Family Finance Manager",
+  title: "PennyPilot",
   description: "Simple family budget and bill tracker",
 };
 
