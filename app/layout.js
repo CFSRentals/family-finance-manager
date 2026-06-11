@@ -1,3 +1,5 @@
+import "./globals.css";
+
 export const metadata = {
   title: "Family Finance Manager",
   description: "Simple family budget and bill tracker",
