@@ -36,6 +36,26 @@ export default async function Home() {
     revalidatePath("/");
   }
 
+  async function deleteExpense(formData) {
+    "use server";
+    const expenseId = formData.get("expenseId");
+    const amount = Number(formData.get("amount"));
+
+    await supabase.from("expenses").delete().eq("id", expenseId);
+
+    const { data: accounts } = await supabase.from("accounts").select("*").limit(1);
+    const account = accounts?.[0];
+
+    if (account) {
+      await supabase
+        .from("accounts")
+        .update({ current_balance: Number(account.current_balance) + amount })
+        .eq("id", account.id);
+    }
+
+    revalidatePath("/");
+  }
+
   async function addPaycheck(formData) {
     "use server";
     const amount = Number(formData.get("amount"));
@@ -53,6 +73,26 @@ export default async function Home() {
       await supabase
         .from("accounts")
         .update({ current_balance: Number(account.current_balance) + amount })
+        .eq("id", account.id);
+    }
+
+    revalidatePath("/");
+  }
+
+  async function deletePaycheck(formData) {
+    "use server";
+    const paycheckId = formData.get("paycheckId");
+    const amount = Number(formData.get("amount"));
+
+    await supabase.from("paychecks").delete().eq("id", paycheckId);
+
+    const { data: accounts } = await supabase.from("accounts").select("*").limit(1);
+    const account = accounts?.[0];
+
+    if (account) {
+      await supabase
+        .from("accounts")
+        .update({ current_balance: Number(account.current_balance) - amount })
         .eq("id", account.id);
     }
 
@@ -180,9 +220,18 @@ export default async function Home() {
         <div className="card">
           <h2>Recent Expenses</h2>
           {expenses?.slice(0, 5).map((e) => (
-            <p key={e.id}>
-              <strong>{e.category}</strong> — {money(e.amount)} {e.description ? `— ${e.description}` : ""}
-            </p>
+            <div className="bill" key={e.id}>
+              <p>
+                <strong>{e.category}</strong> — {money(e.amount)}{" "}
+                {e.description ? `— ${e.description}` : ""}
+              </p>
+
+              <form action={deleteExpense}>
+                <input type="hidden" name="expenseId" value={e.id} />
+                <input type="hidden" name="amount" value={e.amount} />
+                <button>Delete Expense</button>
+              </form>
+            </div>
           ))}
         </div>
       </section>
@@ -200,9 +249,17 @@ export default async function Home() {
         <div className="card">
           <h2>Recent Paychecks</h2>
           {paychecks?.slice(0, 5).map((p) => (
-            <p key={p.id}>
-              <strong>{money(p.amount)}</strong> — {p.notes || "Paycheck"}
-            </p>
+            <div className="bill paid" key={p.id}>
+              <p>
+                <strong>{money(p.amount)}</strong> — {p.notes || "Paycheck"}
+              </p>
+
+              <form action={deletePaycheck}>
+                <input type="hidden" name="paycheckId" value={p.id} />
+                <input type="hidden" name="amount" value={p.amount} />
+                <button>Delete Paycheck</button>
+              </form>
+            </div>
           ))}
         </div>
       </section>
